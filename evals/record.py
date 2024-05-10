@@ -27,9 +27,9 @@ from evals.utils.snowflake import SnowflakeConnection
 
 logger = logging.getLogger(__name__)
 
-MIN_FLUSH_EVENTS = 100
+MIN_FLUSH_EVENTS = 0
 MAX_SNOWFLAKE_BYTES = 16 * 10**6
-MIN_FLUSH_SECONDS = 10
+MIN_FLUSH_SECONDS = 0
 
 _default_recorder: ContextVar[Optional["RecorderBase"]] = ContextVar(
     "default_recorder", default=None
@@ -174,8 +174,8 @@ class RecorderBase:
             )
             self._events.append(event)
             if (
-                self._flushes_done < self._flushes_started
-                or len(self._events) < self._written_events + MIN_FLUSH_EVENTS
+                # self._flushes_done < self._flushes_started or
+                    len(self._events) < self._written_events + MIN_FLUSH_EVENTS
                 or time.time() < self._last_flush_time + MIN_FLUSH_SECONDS
             ):
                 return

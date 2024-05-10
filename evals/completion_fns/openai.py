@@ -1,8 +1,10 @@
+import json
 import logging
 from typing import Any, Optional, Union
 
 import openai
 from openai import OpenAI
+from openai.types import CompletionUsage
 
 from evals.api import CompletionFn, CompletionResult
 from evals.base import CompletionFnSpec
@@ -22,6 +24,17 @@ OPENAI_TIMEOUT_EXCEPTIONS = (
     openai.APITimeoutError,
     openai.InternalServerError,
 )
+
+
+# CompletionUsage不支持序列化，因此选择http_run时，发送请求时会报错
+def completion_usage_serializer(obj):
+    if isinstance(obj, CompletionUsage):
+        return {
+            "completion_tokens": obj.completion_tokens,
+            "prompt_tokens": obj.prompt_tokens,
+            "total_tokens": obj.total_tokens
+        }
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
 
 
 def openai_completion_create_retrying(client: OpenAI, *args, **kwargs):
@@ -126,7 +139,7 @@ class OpenAICompletionFn(CompletionFn):
             prompt=result.prompt,
             sampled=result.get_completions(),
             model=result.raw_data.model,
-            usage=result.raw_data.usage,
+            usage=json.dumps(result.raw_data.usage, default=completion_usage_serializer),
         )
         return result
 
@@ -176,6 +189,6 @@ class OpenAIChatCompletionFn(CompletionFnSpec):
             prompt=result.prompt,
             sampled=result.get_completions(),
             model=result.raw_data.model,
-            usage=result.raw_data.usage,
+            usage=json.dumps(result.raw_data.usage, default=completion_usage_serializer),
         )
         return result

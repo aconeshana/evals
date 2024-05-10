@@ -48,6 +48,8 @@ dependencies = [
     "types-PyYAML",
     "types-tqdm",
     "zstandard",
+    "fastapi",
+    "sqlalchemy"
 ]
 
 [project.urls]

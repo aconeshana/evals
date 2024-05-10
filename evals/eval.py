@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 from evals.api import CompletionFn
 
-from .data import get_jsonl
+from .data import get_jsonl, get_jsonl_from_store
 from .record import RecorderBase
 from .registry import Registry
 from .solvers.solver import Solver
@@ -57,6 +57,7 @@ class Eval(abc.ABC):
         self,
         completion_fns: list[Union[CompletionFn, Solver]],
         eval_registry_path: Path,
+        eval_registry_id: Optional[int] = None,
         seed: int = 20220722,
         name: str = "no_name_eval.default",
         registry: Optional[Registry] = None,
@@ -68,6 +69,7 @@ class Eval(abc.ABC):
 
         self.completion_fns = [maybe_wrap_with_compl_fn(fn) for fn in completion_fns]
         self.eval_registry_path = eval_registry_path
+        self.eval_registry_id = eval_registry_id
         self.seed = seed
         self.name = name
         self.registry = registry or Registry()
@@ -152,8 +154,13 @@ class Eval(abc.ABC):
                 "To use `get_samples`, you must provide a `samples_jsonl` path." "Got `None`."
             )
 
-        samples_path = self._get_samples_path()
-        return get_jsonl(samples_path.as_posix())
+        if self.eval_registry_path is not None:
+            samples_path = self._get_samples_path()
+            return get_jsonl(samples_path.as_posix())
+        elif self.eval_registry_id is not None:
+            return get_jsonl_from_store(self.eval_registry_id)
+        else:
+            raise NotImplementedError()
 
     def _get_samples_path(self) -> Path:
         return self._prefix_registry_path(self.samples_jsonl)

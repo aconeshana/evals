@@ -1,5 +1,21 @@
 """
 This file defines various common metrics of interest.
+准确率（Accuracy）：是最直观的性能指标，表示正确预测的数量占总样本数的比例。计算方式为正确预测的事件数除以总事件数。
+
+Bootstrap准确率标准差（Bootstrap Accuracy Standard Deviation）：通过对数据进行重采样来估计准确率的标准差，从而可以得到准确率的不确定性估计。这是一种评估模型稳定性的方法。
+
+混淆矩阵（Confusion Matrix）：是一个表格，用于描述模型预测与实际类别之间的关系。它显示了每个真实类别被预测为每个预测类别的次数，从而可以详细了解模型在哪些类别上表现好，哪些类别上表现差。
+
+Matthews相关系数（Matthews Correlation Coefficient, MCC）：是一个介于-1和1之间的值，用于衡量二分类（正类和负类）问题中模型的性能。MCC考虑了真正例、假正例、真负例和假负例，因此即使类别不平衡时也是一个很好的性能度量。
+
+精确率（Precision）：表示被正确预测为正类的样本数占所有被预测为正类的样本数的比例。它反映了模型预测正类的准确性。
+
+召回率（Recall）：表示被正确预测为正类的样本数占所有真实正类的样本数的比例。它反映了模型找出正类样本的能力。
+
+F分数（F-Score）：是精确率和召回率的加权调和平均，用于同时考虑精确率和召回率的指标。通过调整β值，可以控制精确率对F分数的影响大于、小于或等于召回率的影响。
+
+平均F分数（Averaged F-Score）：是在多类分类问题中，对每个类别计算F分数，然后取平均值的结果。这里的平均方法是宏平均（Macro Average），即简单地计算各类别F分数的算术平均值。
+
 """
 import random
 from typing import Optional, Sequence, Set

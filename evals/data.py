@@ -18,6 +18,8 @@ import blobfile as bf
 import lz4.frame
 import pydantic
 import zstandard
+from api.mysql.models import retrieve_eval_data
+from evals.base import EvalSpec
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +133,22 @@ def get_jsonl(path: str) -> list[dict]:
                 result += get_jsonl(os.path.join(path, filename))
         return result
     return _get_jsonl_file(path)
+
+
+def mock_get_eval_data(id: int, type: str) -> EvalSpec:
+    return EvalSpec(cls=type, key=f"{id}.dev.0", args={'samples_jsonl': 'chinese_chu_ci2/samples.jsonl'})
+
+
+def get_jsonl_from_store(id: int) -> list[dict]:
+    data = retrieve_eval_data(id)
+    jsonl_data = data.content.strip()
+
+    # 按行分割字符串
+    lines = jsonl_data.split('\n')
+
+    # 解析每一行，并将结果存入列表
+    data_list = [json.loads(line) for line in lines]
+    return data_list
 
 
 def get_jsonls(paths: Sequence[str], line_limit=None) -> list[dict]:

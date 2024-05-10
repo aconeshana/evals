@@ -54,7 +54,7 @@ class EvalSpec:
     """
 
     cls: str
-    registry_path: Path
+    registry_path: Optional[Path] = None
     args: Optional[Dict[str, Any]] = None
     key: Optional[str] = None
     group: Optional[str] = None
@@ -84,6 +84,8 @@ class RunSpec:
 
     def __post_init__(self):
         now = datetime.datetime.utcnow()
+        self.created_at = str(now)
+        if self.run_id is not None:
+            return
         rand_suffix = base64.b32encode(os.urandom(5)).decode("ascii")
         self.run_id = now.strftime("%y%m%d%H%M%S") + rand_suffix
-        self.created_at = str(now)

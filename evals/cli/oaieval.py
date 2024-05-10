@@ -5,12 +5,13 @@ import argparse
 import logging
 import shlex
 import sys
-from typing import Any, Mapping, Optional, Union, cast
+from typing import Any, Mapping, Optional, Union, cast, Tuple, Dict
 
 import evals
 import evals.api
 import evals.base
 import evals.record
+from evals.data import mock_get_eval_data
 from evals.eval import Eval
 from evals.record import RecorderBase
 from evals.registry import Registry
@@ -113,9 +114,11 @@ class OaiEvalArguments(argparse.Namespace):
     http_fail_percent_threshold: int
     dry_run: bool
     dry_run_logging: bool
+    extra_completion_args: Optional[Dict[str, Any]]
 
 
-def run(args: OaiEvalArguments, registry: Optional[Registry] = None) -> str:
+def run(args: OaiEvalArguments, registry: Optional[Registry] = None, eval_registry_id: Optional[int] = None,
+        match: str = "evals.elsuite.basic.match:Match", run_id: str = None) -> Tuple[str, Dict[str, float]]:
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -129,6 +132,8 @@ def run(args: OaiEvalArguments, registry: Optional[Registry] = None) -> str:
         registry.add_registry_paths(args.registry_path)
 
     eval_spec = registry.get_eval(args.eval)
+    if eval_spec is None:
+        eval_spec = mock_get_eval_data(eval_registry_id, match)
     assert (
         eval_spec is not None
     ), f"Eval {args.eval} not found. Available: {list(sorted(registry._evals.keys()))}"
@@ -167,7 +172,9 @@ def run(args: OaiEvalArguments, registry: Optional[Registry] = None) -> str:
 
     completion_fns = args.completion_fn.split(",")
     completion_fn_instances = [
-        registry.make_completion_fn(url, **additional_completion_args) for url in completion_fns
+        registry.make_completion_fn(url, **additional_completion_args, **(
+            {'extra_options': args.extra_completion_args} if args.extra_completion_args is not None else {})) for url in
+        completion_fns
     ]
 
     run_config = {
@@ -191,6 +198,7 @@ def run(args: OaiEvalArguments, registry: Optional[Registry] = None) -> str:
         base_eval=eval_name.split(".")[0],
         split=eval_name.split(".")[1],
         run_config=run_config,
+        run_id=f"{run_id}",
         created_by=args.user,
     )
 
@@ -220,6 +228,7 @@ def run(args: OaiEvalArguments, registry: Optional[Registry] = None) -> str:
         seed=args.seed,
         name=eval_name,
         eval_registry_path=eval_spec.registry_path,
+        eval_registry_id=eval_registry_id,
         registry=registry,
         **extra_eval_params,
     )
@@ -233,7 +242,7 @@ def run(args: OaiEvalArguments, registry: Optional[Registry] = None) -> str:
     logger.info("Final report:")
     for key, value in result.items():
         logger.info(f"{key}: {value}")
-    return run_spec.run_id
+    return run_spec.run_id, result
 
 
 def build_recorder(
