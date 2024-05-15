@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "author": "kevin.zhang <kevin.zhang@ximalaya.com>",
+  "scripts": {
+    "dev": "umi dev",
+    "build": "umi build",
+    "postinstall": "umi setup",
+    "setup": "umi setup",
+    "start": "npm run dev"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "ahooks": "^3.7.11",
+    "antd": "^5.17.0",
+    "dayjs": "^1.11.11",
+    "umi": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.33",
+    "@types/react-dom": "^18.0.11",
+    "@umijs/plugins": "^4.2.2",
+    "tailwindcss": "^3",
+    "typescript": "^5.0.3"
+  }
+}
