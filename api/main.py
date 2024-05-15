@@ -1,8 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from api.routers import eval_data
-from routers import eval
+from routers import eval,eval_data
 
 app = FastAPI()
 

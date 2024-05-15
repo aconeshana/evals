@@ -39,6 +39,7 @@ dependencies = [
     "sacrebleu",
     "seaborn",
     "snowflake-connector-python[pandas]",
+    "spacy==3.7.4",
     "spacy-universal-sentence-encoder",
     "statsmodels",
     "termcolor",
